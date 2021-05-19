@@ -61,16 +61,6 @@ async function checkUsernameExists(req, res, next) {
       "message": "Invalid credentials"
     }
   */
-  // const userQuery = await db('users')
-  //   .select('user_id', 'username')
-  //   .where('username', req.body.username)
-  // if (userQuery.length === 0){
-  //   res.status(401).json({
-  //     message: "Invalid credentials",
-  //   })
-  // } else {
-  //   next();
-  // }
   try {
     const [user] = await Users.findBy({ username: req.body.username })
     if (!user) {
@@ -79,12 +69,12 @@ async function checkUsernameExists(req, res, next) {
         message: "Invalid credentials",
       })
     } else {
+      req.user = user;
       next();
     }
   } catch (err) {
     next(err)
   }
-  
 }
 
 

@@ -18,19 +18,25 @@ router.post("/register", validateRoleName, (req, res, next) => {
       "role_name": "angel"
     }
    */
-  let { username, password } = req.body;
-  let { role_name } = req.body;
+    let user = req.body
+    const hash = bcrypt.hashSync(user.password, 8);
+    const role = user.role_name || 'student'
+    user.password = hash
+    user.role_name = role
+  
+  // let { username, password } = req.body;
+  // let { role_name } = req.body;
 
-  const rounds = process.env.BCRYPT_ROUNDS || 8;
-  const hash = bcrypt.hashSync(password, rounds);
+  // const rounds = process.env.BCRYPT_ROUNDS || 8;
+  // const hash = bcrypt.hashSync(password, rounds);
 
-  if (!role_name){
-    role_name = 'instructor'; 
-  }
+  // // if (!role_name){
+  // //   role_name = 'instructor';
+  // // }
 
-  Users.add({ username, password: hash, role_name})
-    .then(userRegistrationResponse => {
-      res.status(201).json(userRegistrationResponse)
+  Users.add(user)
+    .then(newUser => {
+      res.status(201).json(newUser)
     })
     .catch(next);
 
@@ -71,5 +77,11 @@ router.post("/login", checkUsernameExists, (req, res, next) => {
       }
     })
 });
+
+// function buildToken(user) {
+//   const payload = {
+//     subject: user.use
+//   }
+// }
 
 module.exports = router;

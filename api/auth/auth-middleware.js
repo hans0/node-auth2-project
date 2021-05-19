@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken')
 
-const db = require('./../../data/db-config.js')
+const Users = require('./../users/users-model')
+// const db = require('./../../data/db-config.js')
 const { JWT_SECRET } = require("../secrets"); // use this secret!
 
 const restricted = (req, res, next) => {
@@ -47,6 +48,7 @@ const only = role_name => (req, res, next) => {
   */
   const token = req.headers.authorization
   
+  next()
 
 }
 
@@ -59,15 +61,28 @@ async function checkUsernameExists(req, res, next) {
       "message": "Invalid credentials"
     }
   */
-  const userQuery = await db('users')
-    .select('user_id', 'username')
-    .where('username', req.body.username)
-  if (userQuery.length === 0){
-    res.status(401).json({
-      message: "Invalid credentials",
-    })
-  } else {
-    next();
+  // const userQuery = await db('users')
+  //   .select('user_id', 'username')
+  //   .where('username', req.body.username)
+  // if (userQuery.length === 0){
+  //   res.status(401).json({
+  //     message: "Invalid credentials",
+  //   })
+  // } else {
+  //   next();
+  // }
+  try {
+    const [user] = await Users.findBy({ username: req.body.username })
+    if (!user) {
+      next({
+        status: 401,
+        message: "Invalid credentials",
+      })
+    } else {
+      next();
+    }
+  } catch (err) {
+    next(err)
   }
   
 }

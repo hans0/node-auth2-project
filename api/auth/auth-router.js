@@ -7,7 +7,7 @@ const { JWT_SECRET } = require("../secrets"); // use this secret!
 const buildToken = require('./token-builder')
 
 router.post("/register", validateRoleName, (req, res, next) => {
-  /**
+  /*
     [POST] /api/auth/register { "username": "anna", "password": "1234", "role_name": "angel" }
 
     response:
@@ -18,6 +18,13 @@ router.post("/register", validateRoleName, (req, res, next) => {
       "role_name": "angel"
     }
    */
+  let user = req.body;
+
+  Users.add(user)
+    .then(userRegistrationResponse => {
+      res.status(201).json(userRegistrationResponse)
+    })
+    .catch(next);
 
 });
 
@@ -52,7 +59,7 @@ router.post("/login", checkUsernameExists, (req, res, next) => {
           token,
         });
       } else {
-        res.status(401).json('Invalid credentials')
+        res.status(401).json({ message: 'Invalid credentials' })
       }
     })
 });

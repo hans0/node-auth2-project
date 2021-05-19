@@ -1,3 +1,6 @@
+const jwt = require('jsonwebtoken')
+
+const db = require('./../../data/db-config.js')
 const { JWT_SECRET } = require("../secrets"); // use this secret!
 
 const restricted = (req, res, next) => {
@@ -16,8 +19,19 @@ const restricted = (req, res, next) => {
 
     Put the decoded token in the req object, to make life easier for middlewares downstream!
   */
- next()
-
+  const token = req.headers.authorization;
+  if (token) {
+    jwt.verify(token, JWT_SECRET, (err, decoded) => {
+      if (err) {
+        next({ status: 401, message: "Token invalid" })
+      } else {
+        req.decodedJwt = decoded
+        next();
+      }
+    })
+  } else {
+    next({ status: 401, message: "Token required" })
+  }
 }
 
 const only = role_name => (req, res, next) => {
@@ -36,7 +50,7 @@ const only = role_name => (req, res, next) => {
 }
 
 
-const checkUsernameExists = (req, res, next) => {
+async function checkUsernameExists(req, res, next) {
   /*
     If the username in req.body does NOT exist in the database
     status 401
@@ -44,8 +58,17 @@ const checkUsernameExists = (req, res, next) => {
       "message": "Invalid credentials"
     }
   */
-    next()
-
+  const userQuery = await db('users')
+    .select('user_id', 'username')
+    .where('username', req.body.username)
+  if (userQuery.length === 0){
+    res.status(401).json({
+      message: "Invalid credentials",
+    })
+  } else {
+    next();
+  }
+  
 }
 
 
@@ -68,7 +91,7 @@ const validateRoleName = (req, res, next) => {
       "message": "Role name can not be longer than 32 chars"
     }
   */
-    next()
+  next()
 
 }
 

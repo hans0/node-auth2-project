@@ -46,12 +46,12 @@ const only = role_name => (req, res, next) => {
 
     Pull the decoded token from the req object, to avoid verifying it again!
   */
-  const token = req.headers.authorization
-  
-  next()
-
+  if (role_name === req.decodedJwt.role_name){
+    next()
+  } else {
+    next({ status: 403, message: "This is not for you" })
+  }
 }
-
 
 async function checkUsernameExists(req, res, next) {
   /*
@@ -77,7 +77,6 @@ async function checkUsernameExists(req, res, next) {
   }
 }
 
-
 const validateRoleName = (req, res, next) => {
   /*
     If the role_name in the body is valid, set req.role_name to be the trimmed string and proceed.
@@ -97,8 +96,6 @@ const validateRoleName = (req, res, next) => {
       "message": "Role name can not be longer than 32 chars"
     }
   */
-
-    
   if (req.body.role_name){
     if (req.body.role_name.trim().length > 32){
       res.status(422).json({message:"Role name can not be longer than 32 chars"})

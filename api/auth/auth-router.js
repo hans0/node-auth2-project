@@ -18,27 +18,16 @@ router.post("/register", validateRoleName, (req, res, next) => {
       "role_name": "angel"
     }
    */
-    let user = req.body
-    const hash = bcrypt.hashSync(user.password, 8);
-    const role = user.role_name || 'student'
-    user.password = hash
-    user.role_name = role
-  
-  // let { username, password } = req.body;
-  // let { role_name } = req.body;
-
-  // const rounds = process.env.BCRYPT_ROUNDS || 8;
-  // const hash = bcrypt.hashSync(password, rounds);
-
-  // // if (!role_name){
-  // //   role_name = 'instructor';
-  // // }
-
+  let user = req.body
+  const hash = bcrypt.hashSync(user.password, 8)
+  user.password = hash
+  user.role_name = req.role_name.trim() // <- setting req.body.role_name to req.role_name (from middleware)
   Users.add(user)
     .then(newUser => {
       res.status(201).json(newUser)
     })
-    .catch(next);
+    .catch(next)
+
 
 });
 
